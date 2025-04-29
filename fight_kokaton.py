@@ -173,7 +173,7 @@ class Explosion:
         self.img = self.images[self.index]
         self.rct = self.img.get_rect()
         self.rct.center = center
-        self.life = 20
+        self.life = 10
 
     def update(self, screen:pg.Surface):
         self.life -= 1
