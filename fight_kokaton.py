@@ -162,6 +162,26 @@ class Score:
         screen.blit(self.img, self.rct)  # スコアを画面に描画  
     
 
+class Explosion:
+    def __init__(self,center: tuple[int,int]):
+        """
+        爆発の初期化
+        """
+        self.img = pg.image.load(f"fig/explosion.gif")
+        self.images = [self.img , pg.transform.flip(self.img, True, True)]
+        self.index = 0  # 現在の画像インデックス
+        self.img = self.images[self.index]
+        self.rct = self.img.get_rect()
+        self.rct.center = center
+        self.life = 20
+
+    def update(self, screen:pg.Surface):
+        self.life -= 1
+        if self.life > 0:
+            self.index = (self.index + 1) % 2  # 画像を交互に切り替える
+            self.img = self.images[self.index]
+            screen.blit(self.img, self.rct)  # 爆発を描画
+
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -173,6 +193,7 @@ def main():
     #bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     score = Score()
+    explosions = []
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -206,8 +227,16 @@ def main():
                     bombs[j] = None  #爆弾を消す
                     bird.change_img(6, screen) #こうかとんが喜ぶエフェクト
                     score.score+=1
+                    explosions.append(Explosion(bomb.rct.center))
             bombs = [bomb for bomb in bombs if bomb is not None]  #画面に残った爆弾のリスト
         beams = [beam for beam in beams if beam is not None]  # 画面に残ったビームのリスト
+
+
+        # 爆発エフェクトの更新と描画
+        for explosion in explosions:
+            explosion.update(screen)
+            if explosion.life <= 0:  # 爆発が終了したら削除
+                explosions.remove(explosion)
 
         for i, beam in enumerate(beams):
             if check_bound(beam.rct) != (True, True):
