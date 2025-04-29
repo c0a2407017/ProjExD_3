@@ -142,6 +142,27 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+class Score:
+    """
+    スコアの初期化
+    """
+    def __init__(self):
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体",30)
+        self.score = 0
+        self.img = self.fonto.render(f"スコア:{self.score}", 0, (0,0,255))
+        self.rct = self.img.get_rect()
+        self.rct.bottomleft = (100, HEIGHT - 50)
+
+    def update(self, screen: pg.Surface):
+        """
+        スコアを表示させるメソッド
+        引数 screen：画面Surface
+        """
+        self.img = self.fonto.render(f"スコア: {self.score}", 0, (0,0,255))  # スコアを更新
+        screen.blit(self.img, self.rct)  # スコアを画面に描画  
+    
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -150,6 +171,7 @@ def main():
     beam = None
     #bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+    score = Score()
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -181,6 +203,7 @@ def main():
                     beam = None  #ビームを消す
                     bombs[j] = None  #爆弾を消す
                     bird.change_img(6, screen) #こうかとんが喜ぶエフェクト
+                    score.score+=1
         bombs = [bomb for bomb in bombs if bomb is not None]  #画面に残った爆弾のリスト
 
         key_lst = pg.key.get_pressed()
@@ -189,6 +212,7 @@ def main():
             beam.update(screen)
         for bomb in bombs:
             bomb.update(screen)
+        score.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
