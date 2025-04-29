@@ -7,6 +7,7 @@ import pygame as pg
 
 WIDTH = 1100  # ゲームウィンドウの幅
 HEIGHT = 650  # ゲームウィンドウの高さ
+NUM_OF_BOMBS = 5 #爆弾の数
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -126,6 +127,7 @@ class Bomb:
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self.vx, self.vy = +5, +5
 
+
     def update(self, screen: pg.Surface):
         """
         爆弾を速度ベクトルself.vx, self.vyに基づき移動させる
@@ -146,7 +148,8 @@ def main():
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200))
     beam = None
-    bomb = Bomb((255, 0, 0), 10)
+    #bomb = Bomb((255, 0, 0), 10)
+    bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -158,7 +161,8 @@ def main():
                 beam = Beam(bird)            
         screen.blit(bg_img, [0, 0])
         
-        if bomb is not None:
+        #if bomb is not None:
+        for bomb in bombs:
             if bird.rct.colliderect(bomb.rct):
                 # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
                 #bird.change_img(8, screen)
@@ -169,17 +173,21 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-        if beam is not None and bomb is not None:
-            if beam.rct.colliderect(bomb.rct):  #ビームと爆弾の衝突判定
-                beam = None  #ビームを消す
-                bomb = None  #爆弾を消す
-                bird.change_img(6, screen) #こうかとんが喜ぶエフェクト
+            
+
+        for j,bomb in enumerate(bombs):
+            if beam is not None :
+                if beam.rct.colliderect(bomb.rct):  #ビームと爆弾の衝突判定
+                    beam = None  #ビームを消す
+                    bombs[j] = None  #爆弾を消す
+                    bird.change_img(6, screen) #こうかとんが喜ぶエフェクト
+        bombs = [bomb for bomb in bombs if bomb is not None]  #画面に残った爆弾のリスト
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         if beam is not None:
             beam.update(screen)
-        if bomb is not None:   
+        for bomb in bombs:
             bomb.update(screen)
         pg.display.update()
         tmr += 1
